@@ -3,7 +3,7 @@
 bashrc_path="bash/bashrc"
 root_bashrc_path="bash/root_bashrc"
 aliases_path="bash/aliases"
-vimrc_path="bash/vimrc"
+vimrc_path="vim/vimrc"
 
 # Copy over bash configuration.
 cp $bashrc_path "~/.bashrc"
@@ -26,3 +26,4 @@ then
 else
     cp $vimrc_path "/root/.vimrc"
 fi
+
