@@ -246,7 +246,7 @@ alias reload="source ~/.bashrc"
 
 alias matrix=cmatrix
 
-VPN_PATH="/home/jmurrell/Documents/VPN"
+VPN_PATH="/home/$USER/Documents/VPN"
 # Connecting to the IBM VPN
 alias vpn='sudo openconnect -k $VPN_PATH/$USER.key -c $VPN_PATH/$USER.pem --cafile=$VPN_PATH/sasvpn-ca.pem --csd-wrapper=$VPN_PATH/sasvpn-ohsd.py -i tun1 --no-xmlpost sasvpn.pok.ibm.com'
 
