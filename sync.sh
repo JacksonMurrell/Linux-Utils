@@ -1,4 +1,5 @@
 git branch temp
+git checkout temp
 cp ~/.bashrc bash/bashrc
 cp ~/.aliases bash/aliases
 cp ~/.vimrc vim/vimrc
