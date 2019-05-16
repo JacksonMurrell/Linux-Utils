@@ -205,7 +205,23 @@ runtaz(){
 
 ssh_override(){
     username="jmurrell"
-    command_string="cat /etc/motd;bash --init-file <(echo \"force_color_prompt=yes;PS1='\[\e[92m\]\@\[\e[0m\] at \[\w\]\n\[\e[32m\]$@:> \[\e[m\]';alias ls='ls -la --color';alias ..='cd ..';alias ~='cd $home_directory';alias grep='grep --color=auto'\""
+    # You can run commands through ssh without issue, but if you do that it will automatically close the session
+    # once they finish.
+    #
+    # So, we need to create a new bash session after running whatever commands we want to run.
+    #
+    # First, cat the message of the day to print it upon connecting, because creating a new bash shell prevents
+    # it from showing up automatically like it normally does.
+    #
+    # Then, export the prompt to be used by the new bash shell, along with any other environment variables.
+    #
+    # Finally, start the new bash shell with an initialization file.  The init file used will be via process
+    # substitution (the <() ) syntax.  This creates a super temporary bash file in /dev/fd/ which is deleted
+    # after the command finishes.  Any command outputs inside the "process" are output to the file, and the file
+    # contents are passed as an input to another command (like piping, but more convoluted).  So, if you want to
+    # run raw commands (like in a bash initialization file) you would need to echo them to this file.  Hence
+    # this whole complicated mess below.
+    command_string="cat /etc/motd;export force_color_prompt=yes;export PS1=\"\[\e[92m\]\@\[\e[0m\] at \[\w\]\n\[\e[32m\]$@:> \[\e[m\]\" || echo 'Could not set up prompt';bash --init-file <(echo 'alias ls=\"ls -la --color\";alias ..=\"cd ..\";alias ~=\"cd $home_directory\";alias grep=\"grep --color=auto\"')"
     if [ $1 == "--help" ]
     then
         man ssh
@@ -217,7 +233,7 @@ ssh_override(){
         [columbo.*])
             home_directory="/work3/$username"; \ssh -t $@ $command_string;;
         *)
-            home_directory="/home/jupiter/$username"; \ssh -t $@ \"$command_string\";;
+            home_directory="/home/jupiter/$username"; \ssh -t $@ $command_string;;
     esac
     fi
 }

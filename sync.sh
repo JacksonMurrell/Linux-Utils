@@ -6,9 +6,9 @@ git merge master
 
 conflict=`git diff --check`
 
-if [ i-z "$conflict" ]
+if [ -z "$conflict" ]
 then
-    git add
+    git add *
     git commit -m "Auto-generated commit from sync."
     git push
     git checkout master
