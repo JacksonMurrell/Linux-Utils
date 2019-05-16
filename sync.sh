@@ -29,6 +29,8 @@ then
     \git checkout master
     \git pull
     \git merge --verbose -m "Auto-generated merge from sync." temp
+    # Push the resulting merge to master.
+    \git push
     # Delete the temp branch locally and remote since we don't need it anymore.
     \git push --delete origin temp
     \git branch -D temp
