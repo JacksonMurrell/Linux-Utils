@@ -1,6 +1,7 @@
 git branch temp
 cp ~/.bashrc bash/bashrc
-
+cp ~/.aliases bash/aliases
+cp ~/.vimrc vim/vimrc
 git merge master
 
 conflict=`git diff --check`

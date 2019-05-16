@@ -1,0 +1,236 @@
+#!/bin/bash
+# ~/.bashrc: executed by bash(0) for non-login shells.
+# enable color support of ls and also add handy aliases
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+    #alias dir='dir --color=auto'
+    #alias vdir='vdir --color=auto'
+
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+
+# Some more ls aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+alias ls='ls -la --color'
+alias list='ls'
+
+alias tree='tree -C'
+
+alias search=ack $1
+
+#An editing alias to open a file in an editor of choice.
+alias edit='vim'
+alias vi='vim'
+
+# Media
+alias play='vlc'
+alias sound='pavucontrol'
+
+alias haskell='ghci'
+
+#An alias to quickly edit aliases.
+alias bashrc='edit ~/.bashrc'
+alias aliases='edit ~/.aliases'
+alias vimrc='edit ~/.vimrc'
+
+REPO_PATH="/home/$USER/Documents/Repositories"
+
+#Aliases for directory changes
+alias ..='cd ..'
+alias ~='cd ~'
+alias downloads='cd ~/Downloads/'
+alias bogart='cd $REPO_PATH/Bogart;LAST_SATCHEL_REPO=Bogart'
+alias bogart2='cd $REPO_PATH/Bogart2'
+alias satchel='cd $REPO_PATH/${LAST_SATCHEL_REPO}/satchel'
+alias taz='cd $REPO_PATH/Taz'
+alias tejas='cd $REPO_PATH/Tejas'
+alias azimuth='cd $REPO_PATH/Azimuth;LAST_SATCHEL_REPO=Azimuth'
+alias dynamo='cd $REPO_PATH/Dynamo'
+alias school='cd $REPO_PATH/School'
+
+# Utility commands
+alias findpdb=findpdb
+alias pylint=pylinting
+alias git=git_override
+alias runbogart=runbogart
+alias runtaz=runtaz
+
+GIT_STATUS="\git status | sed -n -e '/^.*modified:\s\s\snewspeak\|satchel/! s/^.*modified:\s\s\s//p'
+                        | sed -n -e 's/\s.*//g;p'"
+
+
+
+LAST_SATCHEL_REPO="Azimuth"
+
+# Function for finding pdb traces left in code.
+findpdb(){
+    PATH_TO_SEARCH=''
+    if [ $# -eq 0 ]
+    then
+        PATH_TO_SEARCH=$REPO_PATH/Bogart/*
+    else
+        PATH_TO_SEARCH=$1
+    fi
+    echo -e "\e[92mPath to search:" $PATH_TO_SEARCH "\e[0m"
+    ack -H "pdb.set_trace"
+}
+
+findTODO(){
+    for i in $(eval $GIT_STATUS)
+    do
+        echo -e "\e[92mPath to search:" $i "\e[0m"
+        VAL=`ack -H TODO $i`
+        echo $VAL
+    done
+}
+
+# Function for pylinting a supplied test.
+pylinting(){
+     if [ $# -eq 0 ]
+     then
+         echo "Need to supply the directory path for pylinting"
+     else
+        PYLINT_PATH=$(pwd)
+        echo $PYLINT_PATH
+        echo $1
+        "$REPO_PATH/Bogart/satchel/scripts/lint.py" $1;
+    fi
+    }
+
+# Function for overriding the existing git commands with custom implementations.
+git_override() {
+    if [ $# -lt 1 ]
+    then
+        \git help
+    elif [ $# -eq 1 ]
+        then
+        if [ "$1" == 'status' ]
+        then
+            TEJAS=`pwd | grep 'Tejas'`
+            if [ ! -z $TEJAS ]
+            then
+                findTODO
+                \git status
+            else
+                bogart_repo_status
+            fi
+        elif [ "$1" == 'add' ]
+        then
+            auto_add_git
+        else
+            \git $1
+        fi
+    elif [ $# -eq 2 ]
+    then
+        if [ "$1" == 'branch' ]
+        then
+            \git branch $2
+            \git checkout $2
+        elif [ "$1" == 'remove' ]
+        then
+            # Reset all changes, remove the desired file, and re-add.
+            # This will discard all the changes for the specified file.
+            \git reset
+            echo "Discarding changes in $2"
+            \git checkout -- $2
+            git add
+        else
+            \git $@
+        fi
+    else
+        \git $@
+    fi
+}
+bogart_repo_status() {
+    for i in $(eval $GIT_STATUS)
+    do
+        if [ $i != 'newspeak' ] && [ $i != 'satchel' ]
+        then
+            findpdb $i
+            pylint $i
+        fi
+    done
+    \git status
+}
+auto_add_git()
+{
+    for i in $(eval $GIT_STATUS)
+    do
+        if [ $i != 'newspeak' ]
+        then
+            echo "Adding file: " $i
+            \git add $i
+        fi
+    done
+    \git status
+}
+
+# Function for running a bogart test wth all parameters in verbose and debug mode
+runbogart(){
+     if [ $# -lt 2 ]
+     then
+         echo "Need to provide the test case and desired config"
+     elif [ $# -eq 2 ]
+     then
+         python3 $REPO_PATH/Bogart/runtests.py . $1 all \
+                 --branches="no_snap" --cleanup -V -d -c $2;
+     else
+         python3 $REPO_PATH/Bogart/runtests.py . $1 $2 \
+                 --branches="no_snap" --cleanup -V -d -c $3;
+     fi
+ }
+
+ # Function for running a taz test wth all parameters in verbose and debug mode
+runtaz(){
+     if [ $# -lt 2 ]
+     then
+         echo "Need to provide the test case and desired config"
+     elif [ $# -eq 2 ]
+     then
+         python $REPO_PATH/Taz/runtests.py . $1 all \
+                --branches='skip_vlm,noclean,skip_elog,nohistory,skip_test_profile,hw,skip_version_check' \
+                -V -d --cleanup -c $2;
+     else
+
+         python $REPO_PATH/Taz/runtests.py . $1 $2 \
+                --branches='skip_vlm,noclean,skip_elog,nohistory,skip_test_profile,hw,skip_version_check' \
+                -V -d --cleanup -c $3;
+     fi
+ }
+
+ssh_override(){
+    username="jmurrell"
+    command_string="cat /etc/motd;bash --init-file <(echo \"force_color_prompt=yes;PS1='\[\e[92m\]\@\[\e[0m\] at \[\w\]\n\[\e[32m\]$@:> \[\e[m\]';alias ls='ls -la --color';alias ..='cd ..';alias ~='cd $home_directory';alias grep='grep --color=auto'\""
+    if [ $1 == "--help" ]
+    then
+        man ssh
+    elif [ $1 == "-h" ]
+    then
+        man ssh
+    else
+    case "$@" in
+        [columbo.*])
+            home_directory="/work3/$username"; \ssh -t $@ $command_string;;
+        *)
+            home_directory="/home/jupiter/$username"; \ssh -t $@ \"$command_string\";;
+    esac
+    fi
+}
+
+# Setting local aliases on servers.
+alias ssh=ssh_override
+
+# Reload the existing shell to reflect changes to this file, or the bashrc file.
+alias reload="source ~/.bashrc"
+
+alias matrix=cmatrix
+
+VPN_PATH="/home/jmurrell/Documents/VPN"
+# Connecting to the IBM VPN
+alias vpn='sudo openconnect -k $VPN_PATH/$USER.key -c $VPN_PATH/$USER.pem --cafile=$VPN_PATH/sasvpn-ca.pem --csd-wrapper=$VPN_PATH/sasvpn-ohsd.py -i tun1 --no-xmlpost sasvpn.pok.ibm.com'
+
