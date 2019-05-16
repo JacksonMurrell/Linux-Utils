@@ -24,14 +24,14 @@ then
     \git add *
     \git commit -m "Auto-generated commit from sync."
     # Push those changes to the temp branch, and make it on the server to preserve the current state.
-    \git push --set-upstream-origin temp
+    \git push --set-upstream origin temp
     # Switch back to master and merge in our new branch.
     \git checkout master
     \git pull
     \git merge --verbose -m "Auto-generated merge from sync." temp
-    # Delete the temp branch since we don't need it anymore.
-    \git branch -d temp
+    # Delete the temp branch locally and remote since we don't need it anymore.
     \git branch --delete temp
+    \git push -D temp
 # Otherwise we will need to merge manually and resolve differences.
 else
     echo "There were unresolvable conflicts in your version and the remote version.  Please resolve them manually."
