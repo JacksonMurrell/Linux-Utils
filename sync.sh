@@ -31,7 +31,7 @@ then
     \git merge --verbose -m "Auto-generated merge from sync." temp
     # Delete the temp branch locally and remote since we don't need it anymore.
     \git branch --delete temp
-    \git push -D temp
+    \git push -d temp
 # Otherwise we will need to merge manually and resolve differences.
 else
     echo "There were unresolvable conflicts in your version and the remote version.  Please resolve them manually."
