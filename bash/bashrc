@@ -71,5 +71,9 @@ export PS1="[\[\e[92m\]\@\[\e[m\]]\[\e[94m\] \u\[\e[97m\] at \[\e[m\][\[\e[97m\]
 # Execute first-time startup commands.
 echo -e "\e[31mWelcome Master Rexacon!\e[37m"
 
-export SVN_EDITOR=vim
 export DOTNET_CLI_TELEMETRY_OPTOUT=true
+
+# Set default editors for the system.
+export SVN_EDITOR=vim
+export VISUAL=vim
+export EDITOR="$VISUAL"
