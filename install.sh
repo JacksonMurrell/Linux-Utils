@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 bashrc_path="bash/bashrc"
 root_bashrc_path="bash/root_bashrc"
