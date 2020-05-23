@@ -44,28 +44,15 @@ REPO_PATH="/home/$USER/Documents/Repositories"
 alias ..='cd ..'
 alias ~='cd ~'
 alias downloads='cd ~/Downloads/'
-alias bogart='cd $REPO_PATH/Bogart;LAST_SATCHEL_REPO=Bogart'
-alias bogart2='cd $REPO_PATH/Bogart2'
-alias satchel='cd $REPO_PATH/${LAST_SATCHEL_REPO}/satchel'
-alias taz='cd $REPO_PATH/Taz'
-alias tejas='cd $REPO_PATH/Tejas'
-alias azimuth='cd $REPO_PATH/Azimuth;LAST_SATCHEL_REPO=Azimuth'
-alias dynamo='cd $REPO_PATH/Dynamo'
-alias school='cd $REPO_PATH/School'
 
 # Utility commands
 alias findpdb=findpdb
 alias pylint=pylinting
 alias git=git_override
-alias runbogart=runbogart
-alias runtaz=runtaz
 
 GIT_STATUS="\git status | sed -n -e '/^.*modified:\s\s\snewspeak\|satchel/! s/^.*modified:\s\s\s//p'
                         | sed -n -e 's/\s.*//g;p'"
 
-
-
-LAST_SATCHEL_REPO="Azimuth"
 
 # Function for finding pdb traces left in code.
 findpdb(){
@@ -203,8 +190,7 @@ runtaz(){
      fi
  }
 
-ssh_override(){
-    username="jmurrell"
+ssh_override() {
     # You can run commands through ssh without issue, but if you do that it will automatically close the session
     # once they finish.
     #
@@ -229,12 +215,6 @@ ssh_override(){
     then
         man ssh
     else
-    case "$@" in
-        [columbo.*])
-            home_directory="/work3/$username"; \ssh -t $@ $command_string;;
-        *)
-            home_directory="/home/jupiter/$username"; \ssh -t $@ $command_string;;
-    esac
     fi
 }
 
