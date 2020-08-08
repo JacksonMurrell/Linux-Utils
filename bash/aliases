@@ -56,13 +56,7 @@ GIT_STATUS="\git status | sed -n -e '/^.*modified:\s\s\snewspeak\|satchel/! s/^.
 
 # Function for finding pdb traces left in code.
 findpdb(){
-    PATH_TO_SEARCH=''
-    if [ $# -eq 0 ]
-    then
-        PATH_TO_SEARCH=$REPO_PATH/Bogart/*
-    else
-        PATH_TO_SEARCH=$1
-    fi
+    PATH_TO_SEARCH=$1
     echo -e "\e[92mPath to search:" $PATH_TO_SEARCH "\e[0m"
     ack -H "pdb.set_trace"
 }
@@ -76,19 +70,6 @@ findTODO(){
     done
 }
 
-# Function for pylinting a supplied test.
-pylinting(){
-     if [ $# -eq 0 ]
-     then
-         echo "Need to supply the directory path for pylinting"
-     else
-        PYLINT_PATH=$(pwd)
-        echo $PYLINT_PATH
-        echo $1
-        "$REPO_PATH/Bogart/satchel/scripts/lint.py" $1;
-    fi
-    }
-
 # Function for overriding the existing git commands with custom implementations.
 git_override() {
     if [ $# -lt 1 ]
@@ -98,14 +79,8 @@ git_override() {
         then
         if [ "$1" == 'status' ]
         then
-            TEJAS=`pwd | grep 'Tejas'`
-            if [ ! -z $TEJAS ]
-            then
-                findTODO
-                \git status
-            else
-                bogart_repo_status
-            fi
+            # Just perform a regular git status.
+            \git status
         elif [ "$1" == 'add' ]
         then
             auto_add_git
@@ -133,19 +108,8 @@ git_override() {
         \git $@
     fi
 }
-bogart_repo_status() {
-    for i in $(eval $GIT_STATUS)
-    do
-        if [ $i != 'newspeak' ] && [ $i != 'satchel' ]
-        then
-            findpdb $i
-            pylint $i
-        fi
-    done
-    \git status
-}
-auto_add_git()
-{
+
+auto_add_git() {
     for i in $(eval $GIT_STATUS)
     do
         if [ $i != 'newspeak' ]
@@ -157,40 +121,7 @@ auto_add_git()
     \git status
 }
 
-# Function for running a bogart test wth all parameters in verbose and debug mode
-runbogart(){
-     if [ $# -lt 2 ]
-     then
-         echo "Need to provide the test case and desired config"
-     elif [ $# -eq 2 ]
-     then
-         python3 $REPO_PATH/Bogart/runtests.py . $1 all \
-                 --branches="no_snap" --cleanup -V -d -c $2;
-     else
-         python3 $REPO_PATH/Bogart/runtests.py . $1 $2 \
-                 --branches="no_snap" --cleanup -V -d -c $3;
-     fi
- }
-
- # Function for running a taz test wth all parameters in verbose and debug mode
-runtaz(){
-     if [ $# -lt 2 ]
-     then
-         echo "Need to provide the test case and desired config"
-     elif [ $# -eq 2 ]
-     then
-         python $REPO_PATH/Taz/runtests.py . $1 all \
-                --branches='skip_vlm,noclean,skip_elog,nohistory,skip_test_profile,hw,skip_version_check' \
-                -V -d --cleanup -c $2;
-     else
-
-         python $REPO_PATH/Taz/runtests.py . $1 $2 \
-                --branches='skip_vlm,noclean,skip_elog,nohistory,skip_test_profile,hw,skip_version_check' \
-                -V -d --cleanup -c $3;
-     fi
- }
-
-ssh_override() {
+#ssh_override() {
     # You can run commands through ssh without issue, but if you do that it will automatically close the session
     # once they finish.
     #
@@ -207,19 +138,18 @@ ssh_override() {
     # contents are passed as an input to another command (like piping, but more convoluted).  So, if you want to
     # run raw commands (like in a bash initialization file) you would need to echo them to this file.  Hence
     # this whole complicated mess below.
-    command_string="cat /etc/motd;export force_color_prompt=yes;export PS1=\"\[\e[92m\]\@\[\e[0m\] at \[\w\]\n\[\e[32m\]$@:> \[\e[m\]\" || echo 'Could not set up prompt';bash --init-file <(echo 'alias ls=\"ls -la --color\";alias ..=\"cd ..\";alias ~=\"cd $home_directory\";alias grep=\"grep --color=auto\"')"
-    if [ $1 == "--help" ]
-    then
-        man ssh
-    elif [ $1 == "-h" ]
-    then
-        man ssh
-    else
-    fi
-}
+#    command_string="cat /etc/motd;export force_color_prompt=yes;export PS1=\"\[\e[92m\]\@\[\e[0m\] at \[\w\]\n\[\e[32m\]$@:> \[\e[m\]\" || echo 'Could not set up prompt';bash --init-file <(echo 'alias ls=\"ls -la --color\";alias ..=\"cd ..\";alias ~=\"cd $home_directory\";alias grep=\"grep --color=auto\"')"
+#    if [ $1 == "--help" ]
+#    then
+#        man ssh
+#    elif [ $1 == "-h" ]
+#    then
+#        man ssh
+#    fi
+#}
 
 # Setting local aliases on servers.
-alias ssh=ssh_override
+#alias ssh=ssh_override
 
 # Reload the existing shell to reflect changes to this file, or the bashrc file.
 alias reload="source ~/.bashrc"
